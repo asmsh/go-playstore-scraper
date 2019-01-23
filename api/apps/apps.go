@@ -1,4 +1,4 @@
-package api
+package apps
 
 import (
 	"github.com/asmsh/go-playstore-scraper/engine/core/appPage"
