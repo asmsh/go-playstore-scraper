@@ -2,7 +2,7 @@ package appPage
 
 import (
 	"fmt"
-	"github.com/asmsh/go-playstore-scraper/engine/restype/fullApp"
+	"github.com/asmsh/go-playstore-scraper/engine/types/fullApp"
 	"github.com/asmsh/go-playstore-scraper/engine/urls"
 	"golang.org/x/net/html"
 	"io"
@@ -19,7 +19,7 @@ import (
 var totalTagsCounter uint64 = 0
 var openedTags int64 = 0
 
-func ParseAppFromFileDebugOnly(filePath string) (*fullApp.App, uint64, int64, error) {
+func ParseAppFromFileDebugOnly(filePath string) (*fullApp.FullApp, uint64, int64, error) {
 	file, e := os.Open(filePath)
 	if e != nil {
 		return nil, 0, 0, e
@@ -30,7 +30,7 @@ func ParseAppFromFileDebugOnly(filePath string) (*fullApp.App, uint64, int64, er
 	return app, totalTagsCounter, openedTags, e
 }
 
-func ParseApp(appUrl *urls.AppUrl) (*fullApp.App, error) {
+func ParseApp(appUrl *urls.AppUrl) (*fullApp.FullApp, error) {
 	url := appUrl.String()
 
 	if app, e := requestPage(url); e != nil {
@@ -45,7 +45,7 @@ func ParseApp(appUrl *urls.AppUrl) (*fullApp.App, error) {
 // ParseAppByID get the full information of an app by providing its appID, or otherwise an error,
 // this will assume the language is 'EN_US' and the country is 'US',
 // for custom language and/or country page use the 'builder'
-func ParseAppByID(id string) (*fullApp.App, error) {
+func ParseAppByID(id string) (*fullApp.FullApp, error) {
 	appUrl, e := urls.NewAppUrl(id)
 	if e != nil {
 		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
@@ -63,7 +63,7 @@ func ParseAppByID(id string) (*fullApp.App, error) {
 }
 
 // ParseAppByUrl get the full information of an app by providing its store page URL, or otherwise an error
-func ParseAppByUrl(url string) (*fullApp.App, error) {
+func ParseAppByUrl(url string) (*fullApp.FullApp, error) {
 	qParams, e := urls.ValidateAppPageURL(url)
 	if e != nil {
 		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
@@ -78,7 +78,7 @@ func ParseAppByUrl(url string) (*fullApp.App, error) {
 	}
 }
 
-func requestPage(url string) (*fullApp.App, error) {
+func requestPage(url string) (*fullApp.FullApp, error) {
 	resp, e := http.Get(url)
 	if e != nil {
 		return nil, fmt.Errorf("error with requesting the url: \n" + e.Error())
@@ -93,7 +93,7 @@ func requestPage(url string) (*fullApp.App, error) {
 	return parsePage(resp.Body)
 }
 
-func parsePage(respBody io.ReadCloser) (*fullApp.App, error) {
+func parsePage(respBody io.ReadCloser) (*fullApp.FullApp, error) {
 	//closing the response body at the end of this function
 	defer respBody.Close()
 
@@ -135,8 +135,8 @@ mainLoop:
 	}
 }
 
-func parseAppContent(acTz *html.Tokenizer) (*fullApp.App, error) {
-	var app = new(fullApp.App)
+func parseAppContent(acTz *html.Tokenizer) (*fullApp.FullApp, error) {
+	var app = new(fullApp.FullApp)
 
 	iconUrls, e := extractIconURL(acTz)
 	if e != nil {
