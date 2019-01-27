@@ -12,14 +12,15 @@ const catPageUrlPrefix string = "https://play.google.com/store/apps/category/"
 func extractIconURL(acTz *html.Tokenizer) ([]string, error) {
 	var iconUrlLoRes, iconUrlHiRes string
 	var iconUrls = []string{"", ""}
+	var containerFound bool
 	var containerTagNum int64
 
-containerLoop:
+mainLoop:
 	for {
 		if openedTags < containerTagNum {
 			// this means that we have exited the container without finding the target element,
 			// so we will break the loop as this is an indication on a expected wrong structure from the parser.
-			break containerLoop
+			break mainLoop
 		}
 
 		tt := acTz.Next()
@@ -32,71 +33,53 @@ containerLoop:
 				openedTags++
 				// skip non candidate tags to improve the speed
 				if len(t.Attr) == 0 {
-					continue containerLoop
+					continue mainLoop
 				}
 
 				for _, attr := range t.Attr {
 					if attr.Key == "class" && attr.Val == "dQrBL" {
+						containerFound = true
 						containerTagNum = openedTags
-						break containerLoop
+						continue mainLoop
 					}
 				}
-			default:
-				// count even any tag that we might close in parsing.
-				handleDefaultStartTagToken(t)
-			}
-		case html.EndTagToken:
-			handleDefaultEndTagToken(acTz.Token())
-		case html.ErrorToken:
-			break containerLoop
-		}
-	}
-imgUrlLoop:
-	for {
-		if openedTags < containerTagNum {
-			break imgUrlLoop
-		}
 
-		tt := acTz.Next()
-		totalTagsCounter++
-		switch tt {
-		case html.StartTagToken:
-			t := acTz.Token()
-			switch t.Data {
-			// <img> tags doesn't count against opened tags.
 			case "img":
-				/*// skip non candidate tags to improve the speed
-				if len(t.Attr) < 5 {
-					continue imgUrlLoop
-				}*/
+				// <img> tags doesn't count against opened tags.
+				if containerFound && openedTags == containerTagNum {
+					/*// skip non candidate tags to improve the speed
+					if len(t.Attr) < 5 {
+						continue mainLoop
+					}*/
 
-				var tmpLoRes string
-				var tmpHiRes string
-				var signs int8
-				for _, attr := range t.Attr {
-					switch {
-					case attr.Key == "class" && attr.Val == "T75of ujDFqe":
-						signs++
-					case attr.Key == "alt" && attr.Val == "Cover art":
-						signs++
-					case attr.Key == "itemprop" && attr.Val == "image":
-						signs++
-					case attr.Key == "src" && attr.Val != "":
-						signs++
-						tmpLoRes = attr.Val
-					case attr.Key == "srcset" && attr.Val != "":
-						signs++
-						tmpHiRes = attr.Val
+					var tmpLoRes string
+					var tmpHiRes string
+					var signs int8
+					for _, attr := range t.Attr {
+						switch {
+						case attr.Key == "class" && attr.Val == "T75of ujDFqe":
+							signs++
+						case attr.Key == "alt" && attr.Val == "Cover art":
+							signs++
+						case attr.Key == "itemprop" && attr.Val == "image":
+							signs++
+						case attr.Key == "src" && attr.Val != "":
+							signs++
+							tmpLoRes = attr.Val
+						case attr.Key == "srcset" && attr.Val != "":
+							signs++
+							tmpHiRes = attr.Val
+						}
 					}
-				}
-				if signs == 5 {
-					tmpHiRes, e := formatHiResImgUrl(tmpHiRes)
-					if e != nil {
-						return nil, e
+					if signs == 5 {
+						tmpHiRes, e := formatHiResImgUrl(tmpHiRes)
+						if e != nil {
+							return nil, e
+						}
+						iconUrlLoRes = tmpLoRes
+						iconUrlHiRes = tmpHiRes
+						break mainLoop
 					}
-					iconUrlLoRes = tmpLoRes
-					iconUrlHiRes = tmpHiRes
-					break imgUrlLoop
 				}
 			default:
 				// count even any tag that we might close in parsing.
@@ -105,9 +88,10 @@ imgUrlLoop:
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
 		case html.ErrorToken:
-			break imgUrlLoop
+			break mainLoop
 		}
 	}
+
 	if iconUrlLoRes == "" || iconUrlHiRes == "" {
 		return nil, fmt.Errorf("couldn't extract the app icon urls")
 	}
@@ -119,12 +103,13 @@ imgUrlLoop:
 
 func extractAppName(acTz *html.Tokenizer) (string, error) {
 	var appName string
-	var nameFound bool
+	var containerFound bool
+	var innerContainerFound bool
 	var containerTagNum int64
-containerLoop:
+mainLoop:
 	for {
 		if openedTags < containerTagNum {
-			break containerLoop
+			break mainLoop
 		}
 
 		tt := acTz.Next()
@@ -137,7 +122,7 @@ containerLoop:
 				openedTags++
 				// skip non candidate tags to improve the speed
 				if len(t.Attr) < 2 {
-					continue containerLoop
+					continue mainLoop
 				}
 
 				var signs int8
@@ -150,64 +135,45 @@ containerLoop:
 					}
 				}
 				if signs == 2 {
+					containerFound = true
 					containerTagNum = openedTags
-					break containerLoop
+					continue mainLoop
 				}
-			default:
-				// count even any tag that we might close in parsing.
-				handleDefaultStartTagToken(t)
-			}
-		case html.EndTagToken:
-			handleDefaultEndTagToken(acTz.Token())
-		case html.ErrorToken:
-			break containerLoop
-		}
-	}
-appNameLoop:
-	for {
-		if openedTags < containerTagNum {
-			break appNameLoop
-		}
-
-		tt := acTz.Next()
-		totalTagsCounter++
-		switch tt {
-		case html.StartTagToken:
-			t := acTz.Token()
-			switch t.Data {
 			case "span":
 				openedTags++
-				// to handle breaking out of the containerLoop on errors without finding the target tag.
-				if containerTagNum != 0 && openedTags > containerTagNum {
-					nameFound = true
+				if containerFound && openedTags > containerTagNum {
+					// this is to checks if we have entered the span body or not,
+					// to prevent taking any wrong text instead of the app name.
+					innerContainerFound = true
 				}
 			default:
 				// count even any tag that we might close in parsing.
 				handleDefaultStartTagToken(t)
 			}
 		case html.TextToken:
-			if nameFound {
+			if innerContainerFound {
 				t := acTz.Token()
 				appName = t.Data
-				nameFound = false
-				break appNameLoop
+				break mainLoop
 			}
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
 		case html.ErrorToken:
-			break appNameLoop
+			break mainLoop
 		}
 	}
+
 	if appName == "" {
 		return "", fmt.Errorf("couldn't extract the app name")
 	}
+
 	return appName, nil
 }
 
 // (devURL, devName, error)
 func extractDevInfo(acTz *html.Tokenizer) (string, string, error) {
 	var devName, devURL string
-	var urlFound bool
+	var containerFound bool
 	var containerTagNum int64
 mainLoop:
 	for {
@@ -218,7 +184,6 @@ mainLoop:
 			t := acTz.Token()
 			switch t.Data {
 			case "a":
-				// count only the tags that we actually open.
 				openedTags++
 				// skip non candidate tags to improve the speed
 				if len(t.Attr) < 2 {
@@ -238,18 +203,16 @@ mainLoop:
 				}
 				if signs == 2 {
 					devURL = tmp
-					urlFound = true
+					containerFound = true
 					containerTagNum = openedTags
 				}
 			default:
-				// count even any tag that we might close in parsing.
 				handleDefaultStartTagToken(t)
 			}
 		case html.TextToken:
-			if urlFound && containerTagNum <= openedTags {
+			if containerFound && containerTagNum <= openedTags {
 				t := acTz.Token()
 				devName = t.Data
-				urlFound = false
 				break mainLoop
 			}
 		case html.EndTagToken:
@@ -258,6 +221,7 @@ mainLoop:
 			break mainLoop
 		}
 	}
+
 	if devURL == "" || devName == "" {
 		return "", "", fmt.Errorf("couldn't find the dev page url or the dev name")
 	}
@@ -268,7 +232,7 @@ mainLoop:
 // (catUrl, catName, err)
 func extractCategoryInfo(acTz *html.Tokenizer) (string, string, error) {
 	var catUrl, catName string
-	var urlFound bool
+	var containerFound bool
 	var containerTagNum int64
 mainLoop:
 	for {
@@ -301,7 +265,7 @@ mainLoop:
 				}
 				if signs == 3 {
 					catUrl = tmp
-					urlFound = true
+					containerFound = true
 					containerTagNum = openedTags
 				}
 			default:
@@ -310,10 +274,9 @@ mainLoop:
 			}
 		case html.TextToken:
 			// we can do this here(check for equality), as the text should be in the same level.
-			if urlFound && containerTagNum == openedTags {
+			if containerFound && containerTagNum == openedTags {
 				t := acTz.Token()
 				catName = t.Data
-				urlFound = false
 				break mainLoop
 			}
 		case html.EndTagToken:
@@ -322,6 +285,7 @@ mainLoop:
 			break mainLoop
 		}
 	}
+
 	if catUrl == "" || catName == "" {
 		return "", "", fmt.Errorf("couldn't find the dev page url or the dev name")
 	}
@@ -381,6 +345,7 @@ mainLoop:
 			break mainLoop
 		}
 	}
+
 	if containerFound && offeringString == "" {
 		return "", fmt.Errorf("the offering container is found, however we couldn't extract the data")
 	} else {
@@ -456,6 +421,7 @@ mainLoop:
 			break mainLoop
 		}
 	}
+
 	if price == "" {
 		return "", fmt.Errorf("couldn't find the app price")
 	}
@@ -469,8 +435,8 @@ func extractMediaUrls(acTz *html.Tokenizer) ([]string, []string, error) {
 	var imagesURLs = make([]string, 0, 30)
 	var mediaContainerFound bool
 	var mediaContainerTagNum int64
-	var startImgContainerFound bool
-	var startImgContainerTagNum int64
+	var videoImgContainerFound bool
+	var videoImgContainerTagNum int64
 	var videoContainerFound bool
 	var videoContainerTagNum int64
 
@@ -504,17 +470,17 @@ videoLoop:
 						// break out of the attr loop, cause all these cases are mutually exclusive.
 						break attrLoop
 					case mediaContainerFound && attr.Key == "class" && attr.Val == "MSLVtf NIc6yf":
-						startImgContainerFound = true
-						startImgContainerTagNum = openedTags
+						videoImgContainerFound = true
+						videoImgContainerTagNum = openedTags
 						break attrLoop
-					case startImgContainerFound && attr.Key == "class" && attr.Val == "TdqJUe":
+					case videoImgContainerFound && attr.Key == "class" && attr.Val == "TdqJUe":
 						videoContainerFound = true
 						videoContainerTagNum = openedTags
 						break attrLoop
 					}
 				}
 			case "img":
-				if startImgContainerFound && openedTags == startImgContainerTagNum {
+				if videoImgContainerFound && openedTags == videoImgContainerTagNum {
 					// skip non candidate tags to improve the speed
 					/*if len(t.Attr) < 2 {
 						continue videoLoop
@@ -646,11 +612,11 @@ screenshotsLoop:
 	}
 
 	if mediaContainerFound {
-		if startImgContainerFound && (startImgUrl == "" || videoUrl == "") {
+		if videoImgContainerFound && (startImgUrl == "" || videoUrl == "") {
 			return nil, nil, fmt.Errorf("the video container is found, " +
 				"however, we couldn't extract the required urls")
 
-		} else if !startImgContainerFound {
+		} else if !videoImgContainerFound {
 			return nil, imagesURLs, nil
 		} else {
 			videoURLs[0] = startImgUrl
@@ -671,13 +637,13 @@ func extractDescription(acTz *html.Tokenizer) (string, error) {
 	var descContainerTagNum2 int64
 	var desc2 = ""
 
-descLoop:
+mainLoop:
 	for {
 		/*if openedTags < descContainerTagNum {
-			break descLoop
+			break mainLoop
 		}*/
 		if openedTags < descContainerTagNum2 {
-			break descLoop
+			break mainLoop
 		}
 
 		tt := acTz.Next()
@@ -692,7 +658,7 @@ descLoop:
 				openedTags++
 
 				if len(t.Attr) < 1 {
-					continue descLoop
+					continue mainLoop
 				}
 
 				for _, attr := range t.Attr {
@@ -712,7 +678,7 @@ descLoop:
 			/*case "meta":
 				// this is used as a first method to retrieve the description, which get it from the meta tag.
 				if !descContainerFound || openedTags != descContainerTagNum || len(t.Attr) < 2 {
-					continue descLoop
+					continue mainLoop
 				}
 
 				var signs uint8
@@ -728,7 +694,7 @@ descLoop:
 				}
 				if signs == 2 {
 					desc = tmp
-					break descLoop
+					break mainLoop
 				}*/
 			default:
 				handleDefaultStartTagToken(t)
@@ -742,7 +708,7 @@ descLoop:
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
 		case html.ErrorToken:
-			break descLoop
+			break mainLoop
 		}
 	}
 
@@ -880,6 +846,7 @@ ratingCountLoop:
 	} else if !ratingContainerFound {
 		return "", "", fmt.Errorf("the rating container is not found")
 	}
+
 	if ratingCountOuterContainerFound && rating == "" {
 		return "", "", fmt.Errorf("the rating count container is found, however we couldn't extract the rating count")
 	} else if !ratingCountOuterContainerFound {
@@ -978,7 +945,6 @@ mainLoop:
 	}
 }
 
-// TODO, extractWhatsNew
 func extractWhatsNew(acTz *html.Tokenizer) (string, error) {
 	var wnOuterContainerFound bool // whatsNewOuterContainer
 	var wnOuterContainerTagNum int64
