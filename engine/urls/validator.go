@@ -64,8 +64,8 @@ func ValidateAppID(id string) (string, error) {
 }
 
 // ValidateAppPageURL checks if the given url is a valid app page url with valid query parameters,
-// and return error otherwise
-func ValidateAppPageURL(url string) (*QueryParams, error) {
+// and return an instance of AppUrl, or a non-nil error otherwise
+func ValidateAppPageURL(url string) (*AppUrl, error) {
 	if len(url) == 0 {
 		return nil, fmt.Errorf("the url shouldn't be empty")
 	}
@@ -77,7 +77,7 @@ func ValidateAppPageURL(url string) (*QueryParams, error) {
 
 	fields := strings.Fields(url)
 	if len(fields) != 1 {
-		return nil, fmt.Errorf("the app id shouldn't have spaces, found '%s'", url)
+		return nil, fmt.Errorf("the url shouldn't have spaces, found '%s'", url)
 	}
 
 	possibleURL := fields[0]
@@ -87,7 +87,7 @@ func ValidateAppPageURL(url string) (*QueryParams, error) {
 		return nil, e
 	}
 
-	return qParams, nil
+	return NewAppUrl(qParams.AppID, qParams.Country, qParams.Lang)
 }
 
 // ValidateAppsStoreURL checks if the given url is a valid store url with valid query parameters,
