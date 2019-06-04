@@ -37,7 +37,7 @@ mainLoop:
 				}
 
 				for _, attr := range t.Attr {
-					if attr.Key == "class" && attr.Val == "dQrBL" {
+					if attr.Key == "class" && attr.Val == "xSyT2c" {
 						containerFound = true
 						containerTagNum = openedTags
 						continue mainLoop
@@ -57,7 +57,7 @@ mainLoop:
 					var signs int8
 					for _, attr := range t.Attr {
 						switch {
-						case attr.Key == "class" && attr.Val == "T75of ujDFqe":
+						case attr.Key == "class" && attr.Val == "T75of sHb2Xb":
 							signs++
 						case attr.Key == "alt" && attr.Val == "Cover art":
 							signs++
@@ -318,7 +318,7 @@ mainLoop:
 					case attr.Key == "class" && attr.Val == "wE7q7b":
 						// reaching this case means we passed the position without finding any offerings.
 						break mainLoop
-					case attr.Key == "class" && attr.Val == "rxic6":
+					case attr.Key == "class" && attr.Val == "bSIuKf":
 						// this is the container we need.
 						containerFound = true
 						containerTagNum = openedTags
@@ -462,14 +462,15 @@ videoLoop:
 			attrLoop:
 				for _, attr := range t.Attr {
 					switch {
-					case attr.Key == "class" && attr.Val == "KDxLi":
+					case attr.Key == "class" && attr.Val == "SgoUSc":
 						// the container of all the media is found, containing the trailer video with its start screen,
 						// and all the containers for the screenshots.
 						mediaContainerFound = true
 						mediaContainerTagNum = openedTags
+
 						// break out of the attr loop, cause all these cases are mutually exclusive.
 						break attrLoop
-					case mediaContainerFound && attr.Key == "class" && attr.Val == "MSLVtf NIc6yf":
+					case mediaContainerFound && attr.Key == "class" && attr.Val == "MSLVtf Q4vdJd":
 						videoImgContainerFound = true
 						videoImgContainerTagNum = openedTags
 						break attrLoop
@@ -490,7 +491,7 @@ videoLoop:
 					var signs int8
 					for _, attr := range t.Attr {
 						switch {
-						case attr.Key == "class" && attr.Val == "T75of lxGQyd":
+						case attr.Key == "class" && attr.Val == "T75of DYfLw":
 							signs++
 						case attr.Key == "src" && attr.Val != "":
 							signs++
@@ -515,7 +516,7 @@ videoLoop:
 						switch {
 						/*case attr.Key == "jscontroller" && attr.Val == "HnDLGf":
 							signs++*/
-						case attr.Key == "class" && attr.Val == "lgooh  ":
+						case attr.Key == "class" && attr.Val == "MMZjL lgooh  ":
 							signs++
 						case attr.Key == "data-trailer-url" && attr.Val != "":
 							signs++
@@ -537,7 +538,7 @@ videoLoop:
 
 					for _, attr := range t.Attr {
 						switch {
-						case attr.Key == "class" && attr.Val == "NIc6yf":
+						case attr.Key == "class" && attr.Val == "Q4vdJd":
 							// the button found is the container for a screenshot,
 							// so, break from the video loop to the screenshots loop.
 							break videoLoop
@@ -587,7 +588,7 @@ screenshotsLoop:
 						tmpSrcset = attr.Val
 					case attr.Key == "alt" && attr.Val == "Screenshot Image":
 						signs++
-						/*case attr.Key == "class" && attr.Val == "T75of lxGQyd":
+						/*case attr.Key == "class" && attr.Val == "T75of DYfLw":
 							signs++
 						case attr.Key == "itemprop" && attr.Val == "image":
 							signs++*/
@@ -601,7 +602,6 @@ screenshotsLoop:
 					imagesURLs = append(imagesURLs, tmpSrc, highRes)
 				}
 			default:
-				// count even any tag that we might close in parsing
 				handleDefaultStartTagToken(t)
 			}
 		case html.EndTagToken:
@@ -905,13 +905,14 @@ mainLoop:
 					case attr.Key == "class" && attr.Val == "Gn2mNd":
 						barNumContainerFound = true
 						continue mainLoop
-					/*case attr.Key == "style" && attr.Val != "":
-						signs++*/
-					case attr.Key == "class" && strings.Contains(attr.Val, "L2o20d"):
-						signs++
-					case attr.Key == "title" && attr.Val != "":
+					case attr.Key == "style" && attr.Val != "":
 						signs++
 						tmpValue = attr.Val
+					case attr.Key == "class" && strings.Contains(attr.Val, "L2o20d"):
+						signs++
+						/*case attr.Key == "title" && attr.Val != "":
+						signs++
+						tmpValue = attr.Val*/
 					}
 					if signs == 2 && currentBar != "" {
 						histogram[currentBar] = tmpValue
@@ -938,8 +939,8 @@ mainLoop:
 
 	if histogramContainerFound && len(histogram) == 5 {
 		return histogram, nil
-	} else if len(histogram) != 5 {
-		return nil, fmt.Errorf("the histogram container is not found, however we couldn't extract the histogram data")
+	} else if histogramContainerFound && len(histogram) != 5 {
+		return nil, fmt.Errorf("the histogram container is found, however we couldn't extract the histogram data")
 	} else {
 		return nil, fmt.Errorf("the histogram container is not found")
 	}
@@ -981,7 +982,7 @@ mainLoop:
 					case attr.Key == "jsrenderer" && attr.Val != "":
 						tmp = attr.Val
 						fallthrough
-					case attr.Key == "jsshadow" && attr.Val == "":
+					case attr.Key == "jsshadow":
 						fallthrough
 					case attr.Key == "jsdata" && attr.Val != "":
 						fallthrough
@@ -990,10 +991,10 @@ mainLoop:
 					}
 				}
 				if signs == 4 {
-					if tmp == "FzdkFd" {
+					if tmp == "eG38Ge" {
 						wnOuterContainerFound = true
 						wnOuterContainerTagNum = openedTags
-					} else if tmp == "Wnurre" {
+					} else if tmp == "HEOg8" {
 						wnOuterContainerFound = false
 						break mainLoop
 					}
@@ -1020,10 +1021,10 @@ mainLoop:
 					wnInnerContainerFound = true
 					wnInnerContainerTagNum = openedTags
 				}
-			case "content":
+			case "span":
 				openedTags++
 
-				if wnInnerContainerFound && openedTags == wnInnerContainerTagNum+1 && len(t.Attr) == 0 {
+				if wnInnerContainerFound && openedTags == wnInnerContainerTagNum+1 && len(t.Attr) == 1 {
 					whatsNewDataFound = true
 				}
 			default:
@@ -1042,8 +1043,8 @@ mainLoop:
 		}
 	}
 
-	if wnOuterContainerFound && whatsNew == "" {
-		return "", fmt.Errorf("the whats new container is found, however we couldn't extract the data from it")
+	if wnInnerContainerFound && whatsNew == "" {
+		return "", fmt.Errorf("the whats new container is found, but we couldn't extract the data from it")
 	} else if whatsNew != "" {
 		return whatsNew, nil
 	} else {
