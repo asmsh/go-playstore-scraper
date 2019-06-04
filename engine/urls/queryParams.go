@@ -1,29 +1,46 @@
 package urls
 
-// all the related Play store url query parameters
+import "github.com/asmsh/go-playstore-scraper/engine/urls/locales"
+
+// query parameters common to all url types
 const (
-	AppIDQueryParam      = "id"
-	LangQueryParam       = "hl"
-	CountryQueryParam    = "gl"
-	ResultsNumQueryParam = "num"
+	langQueryParam    = "hl"
+	countryQueryParam = "gl"
 )
 
-type QueryParams struct {
-	UrlType int // The type of the url that contains these query params,
-	// 0: for AppUrl
-	// 1: for AppsStoreUrl
+// query parameters specific to app page urls
+const (
+	appIDQueryParam = "id"
+)
+
+// query parameters common to collection urls
+const (
+	resultsNumQueryParam = "num"
+)
+
+// internal type
+type urlType string
+
+const (
+	appPageUrlType        urlType = "APP_PAGE_URL"
+	appsCollectionUrlType         = "APPS_COLLECTION_URL"
+)
+
+// internal type
+type queryParams struct {
+	UrlType    urlType // The type of the url that contains these query params
+	Country    locales.Country
+	Lang       locales.Language
 	AppID      string
-	Lang       string
-	Country    string
 	ResultsNum int
 }
 
-// StoreUrlQueryParams is an array containing all the related query params for the store url
-var StoreUrlQueryParams = []string{
-	LangQueryParam, CountryQueryParam, ResultsNumQueryParam,
+// CollectionUrlQueryParams is an array containing all the related query params for a url that represents a collection in the store
+var collectionUrlQueryParams = []string{
+	langQueryParam, countryQueryParam, resultsNumQueryParam,
 }
 
-// AppUrlQueryParams is an array containing all the related query params for the app page url
-var AppUrlQueryParams = []string{
-	AppIDQueryParam, LangQueryParam, CountryQueryParam,
+// AppUrlQueryParams is an array containing all the related query params for a url that represents an app page
+var appUrlQueryParams = []string{
+	langQueryParam, countryQueryParam, appIDQueryParam,
 }

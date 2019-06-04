@@ -14,6 +14,14 @@ const (
 	AppPageBaseUrl = "https://play.google.com/store/apps/details?"
 )
 
+// internal constants for building and verifying the urls
+const (
+	categoryQualifier   = "category"
+	categoryPath        = "/" + categoryQualifier + "/"
+	collectionQualifier = "collection"
+	collectionPath      = "/" + collectionQualifier + "/"
+)
+
 // AppUrl holds the information needed to build an app page url
 type AppUrl struct {
 	appID    string
@@ -37,6 +45,8 @@ func (appURL AppUrl) Language() locales.Language {
 // so, if only one optional parameter is passed it will be used as the country code,
 // if two optional parameters are passed they will be used according to the following order: country, language,
 // and, if more than two optional parameters are passed, the func will return an error.
+// the country is expected to be of type Country or type string.
+// the language is expected to be of type Language or type string.
 func NewAppUrl(appID string, restParams ...interface{}) (*AppUrl, error) {
 	const errPrefix = "couldn't build the app url:"
 
@@ -47,43 +57,60 @@ func NewAppUrl(appID string, restParams ...interface{}) (*AppUrl, error) {
 
 	switch len(restParams) {
 	case 0:
-		return &AppUrl{appID: validID, country: "", language: ""}, nil
+		return &AppUrl{appID: validID, country: locales.CountryNone, language: locales.LanguageNone}, nil
 	case 1:
 		param1 := restParams[0]
+		var country locales.Country
 
-		country, ok := param1.(locales.Country)
-		if !ok {
-			return nil, fmt.Errorf("%s the country should be of type 'Country', found '%T'", errPrefix, param1)
+		switch param1.(type) {
+		case string:
+			country = locales.Country(param1.(string))
+		case locales.Country:
+			country = param1.(locales.Country)
+		default:
+			return nil, fmt.Errorf("%s the country should be of type 'Country' or 'string', found '%T'", errPrefix, param1)
 		}
 
-		if len(country) != 0 && !IsValidCountry(country) {
+		if !IsValidCountry(country) {
 			return nil, fmt.Errorf("%s invalid or unsupported country code '%s'", errPrefix, country)
 		}
 
-		return &AppUrl{appID: validID, country: country, language: ""}, nil
+		return &AppUrl{appID: validID, country: country, language: locales.LanguageNone}, nil
 	case 2:
 		param1 := restParams[0]
 		param2 := restParams[1]
 
-		country, ok := param1.(locales.Country)
-		if !ok {
-			return nil, fmt.Errorf("%s the country should be of type 'Country', found '%T'", errPrefix, param1)
-		}
-		lang, ok := param2.(locales.Language)
-		if !ok {
-			return nil, fmt.Errorf("%s the language should be of type 'Language', found '%T'", errPrefix, param2)
+		var country locales.Country
+		var lang locales.Language
+
+		switch param1.(type) {
+		case string:
+			country = locales.Country(param1.(string))
+		case locales.Country:
+			country = param1.(locales.Country)
+		default:
+			return nil, fmt.Errorf("%s the country should be of type 'Country' or 'string', found '%T'", errPrefix, param1)
 		}
 
-		if len(country) != 0 && !IsValidCountry(country) {
+		switch param2.(type) {
+		case string:
+			lang = locales.Language(param1.(string))
+		case locales.Language:
+			lang = param1.(locales.Language)
+		default:
+			return nil, fmt.Errorf("%s the language should be of type 'Language' or 'string', found '%T'", errPrefix, param2)
+		}
+
+		if !IsValidCountry(country) {
 			return nil, fmt.Errorf("%s invalid or unsupported country code '%s'", errPrefix, country)
 		}
-		if len(lang) != 0 && !IsValidLanguage(lang) {
+		if !IsValidLanguage(lang) {
 			return nil, fmt.Errorf("%s invalid or unsupported language code '%s'", errPrefix, lang)
 		}
 
 		return &AppUrl{appID: validID, country: country, language: lang}, nil
 	default:
-		return nil, fmt.Errorf("%s invalid number of arguments passed", errPrefix)
+		return nil, fmt.Errorf("%s invalid number of arguments passed, expected: 1-3, found: %d", errPrefix, len(restParams))
 	}
 }
 
@@ -91,14 +118,14 @@ func NewAppUrl(appID string, restParams ...interface{}) (*AppUrl, error) {
 func (appURL AppUrl) String() string {
 	url := AppPageBaseUrl
 
-	url += AppIDQueryParam + "=" + appURL.appID
+	url += appIDQueryParam + "=" + appURL.appID
 
 	if len(appURL.country) != 0 {
-		url += "&" + CountryQueryParam + "=" + string(appURL.country)
+		url += "&" + countryQueryParam + "=" + string(appURL.country)
 	}
 
 	if len(appURL.language) != 0 {
-		url += "&" + LangQueryParam + "=" + string(appURL.language)
+		url += "&" + langQueryParam + "=" + string(appURL.language)
 	}
 
 	return url
@@ -134,6 +161,7 @@ func (storeUrl AppsStoreUrl) ResultsNum() int {
 }
 
 // NewAppsStoreUrl returns a new instance of AppsStoreUrl
+//
 // the order of the optional parameters matters,
 // so, if only one optional parameter is passed it will be used as the country code,
 // if two optional parameters are passed they will be used according to the following order: country, language,
@@ -141,7 +169,7 @@ func (storeUrl AppsStoreUrl) ResultsNum() int {
 // and, if more than three optional parameters are passed, the func will return an error.
 //
 // the type of the optional parameters passed matters as well,
-// we expect the country to be of type Country, language of type Language, and resultNum of type int
+// we expect the country to be of type Country or string, language of type Language or string, and resultNum of type int.
 //
 // resultNum value should be between 0-120,
 // a value of '0' means that the resultNum query of the url will be left out,
@@ -158,37 +186,55 @@ func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restPar
 
 	switch len(restParams) {
 	case 0:
-		return &AppsStoreUrl{category: cat, collection: col, country: "", language: "", resultsNum: 0}, nil
+		return &AppsStoreUrl{category: cat, collection: col, country: locales.CountryNone, language: locales.LanguageNone, resultsNum: 0}, nil
 	case 1:
 		param1 := restParams[0]
 
-		country, ok := param1.(locales.Country)
-		if !ok {
-			return nil, fmt.Errorf("%s the country should be of type 'Country', found '%T'", errPrefix, param1)
+		var country locales.Country
+
+		switch param1.(type) {
+		case string:
+			country = locales.Country(param1.(string))
+		case locales.Country:
+			country = param1.(locales.Country)
+		default:
+			return nil, fmt.Errorf("%s the country should be of type 'Country' or 'string', found '%T'", errPrefix, param1)
 		}
 
-		if len(country) != 0 && !IsValidCountry(country) {
+		if !IsValidCountry(country) {
 			return nil, fmt.Errorf("%s invalid or unsupported country code '%s'", errPrefix, country)
 		}
 
-		return &AppsStoreUrl{category: cat, collection: col, country: country, language: "", resultsNum: 0}, nil
+		return &AppsStoreUrl{category: cat, collection: col, country: country, language: locales.LanguageNone, resultsNum: 0}, nil
 	case 2:
 		param1 := restParams[0]
 		param2 := restParams[1]
 
-		country, ok := param1.(locales.Country)
-		if !ok {
-			return nil, fmt.Errorf("%s the country should be of type 'Country', found '%T'", errPrefix, param1)
-		}
-		lang, ok := param2.(locales.Language)
-		if !ok {
-			return nil, fmt.Errorf("%s the language should be of type 'Language', found '%T'", errPrefix, param2)
+		var country locales.Country
+		var lang locales.Language
+
+		switch param1.(type) {
+		case string:
+			country = locales.Country(param1.(string))
+		case locales.Country:
+			country = param1.(locales.Country)
+		default:
+			return nil, fmt.Errorf("%s the country should be of type 'Country' or 'string', found '%T'", errPrefix, param1)
 		}
 
-		if len(country) != 0 && !IsValidCountry(country) {
+		switch param2.(type) {
+		case string:
+			lang = locales.Language(param2.(string))
+		case locales.Language:
+			lang = param2.(locales.Language)
+		default:
+			return nil, fmt.Errorf("%s the language should be of type 'Language' or 'string', found '%T'", errPrefix, param2)
+		}
+
+		if !IsValidCountry(country) {
 			return nil, fmt.Errorf("%s invalid or unsupported country code '%s'", errPrefix, country)
 		}
-		if len(lang) != 0 && !IsValidLanguage(lang) {
+		if !IsValidLanguage(lang) {
 			return nil, fmt.Errorf("%s invalid or unsupported language code '%s'", errPrefix, lang)
 		}
 
@@ -198,23 +244,36 @@ func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restPar
 		param2 := restParams[1]
 		param3 := restParams[2]
 
-		country, ok := param1.(locales.Country)
-		if !ok {
-			return nil, fmt.Errorf("%s the country should be of type 'Country', found '%T'", errPrefix, param1)
+		var country locales.Country
+		var lang locales.Language
+
+		switch param1.(type) {
+		case string:
+			country = locales.Country(param1.(string))
+		case locales.Country:
+			country = param1.(locales.Country)
+		default:
+			return nil, fmt.Errorf("%s the country should be of type 'Country' or 'string', found '%T'", errPrefix, param1)
 		}
-		lang, ok := param2.(locales.Language)
-		if !ok {
-			return nil, fmt.Errorf("%s the language should be of type 'Language', found '%T'", errPrefix, param2)
+
+		switch param2.(type) {
+		case string:
+			lang = locales.Language(param2.(string))
+		case locales.Language:
+			lang = param2.(locales.Language)
+		default:
+			return nil, fmt.Errorf("%s the language should be of type 'Language' or 'string', found '%T'", errPrefix, param2)
 		}
+
 		resNum, ok := param3.(int)
 		if !ok {
 			return nil, fmt.Errorf("%s the result number should be of type 'int', found '%T'", errPrefix, param3)
 		}
 
-		if len(country) != 0 && !IsValidCountry(country) {
+		if !IsValidCountry(country) {
 			return nil, fmt.Errorf("%s invalid or unsupported country code '%s'", errPrefix, country)
 		}
-		if len(lang) != 0 && !IsValidLanguage(lang) {
+		if !IsValidLanguage(lang) {
 			return nil, fmt.Errorf("%s invalid or unsupported language code '%s'", errPrefix, lang)
 		}
 		resNum, e := ValidateResultNum(resNum)
@@ -227,7 +286,7 @@ func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restPar
 
 		return &AppsStoreUrl{category: cat, collection: col, country: country, language: lang, resultsNum: resNum}, nil
 	default:
-		return nil, fmt.Errorf("%s invalid number of arguments passed", errPrefix)
+		return nil, fmt.Errorf("%s invalid number of arguments passed, expected: 2-5, found: %d", errPrefix)
 	}
 }
 
@@ -235,7 +294,12 @@ func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restPar
 func (storeUrl AppsStoreUrl) String() string {
 	url := AppsStoreBaseUrl
 
-	url += string(storeUrl.category)
+	if storeUrl.category != categories.NoCategory {
+		url += categoryPath
+		url += string(storeUrl.category)
+	}
+
+	url += collectionPath
 	url += string(storeUrl.collection)
 
 	if storeUrl.country != "" || storeUrl.language != "" || storeUrl.resultsNum != 0 {
@@ -245,7 +309,7 @@ func (storeUrl AppsStoreUrl) String() string {
 	}
 
 	if len(storeUrl.country) != 0 {
-		url += CountryQueryParam + "=" + string(storeUrl.country)
+		url += countryQueryParam + "=" + string(storeUrl.country)
 
 		if storeUrl.language != "" || storeUrl.resultsNum != 0 {
 			url += "&"
@@ -255,7 +319,7 @@ func (storeUrl AppsStoreUrl) String() string {
 	}
 
 	if len(storeUrl.language) != 0 {
-		url += LangQueryParam + "=" + string(storeUrl.language)
+		url += langQueryParam + "=" + string(storeUrl.language)
 
 		if storeUrl.resultsNum != 0 {
 			url += "&"
@@ -266,7 +330,7 @@ func (storeUrl AppsStoreUrl) String() string {
 
 	// we know for sure it't not a zero
 	if storeUrl.resultsNum != 0 {
-		url += ResultsNumQueryParam + "=" + strconv.Itoa(storeUrl.resultsNum)
+		url += resultsNumQueryParam + "=" + strconv.Itoa(storeUrl.resultsNum)
 	}
 
 	return url
