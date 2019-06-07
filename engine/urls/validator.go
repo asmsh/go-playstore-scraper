@@ -80,11 +80,12 @@ func ValidateAppPageURL(urlStr string) (*AppUrl, error) {
 	return NewAppUrl(qParams.AppID, qParams.Country, qParams.Lang)
 }
 
-// ValidateAppsCollectionURL checks if the given url is a valid apps collection url with valid query parameters,
-// and return the query in that url and nil error, or return non-nil error otherwise
-func ValidateAppsCollectionURL(urlStr string) (*AppsStoreUrl, error) {
+// ValidateAppsStoreURL checks if the given url is a valid url that represent some collection for some app category,
+// and has valid query parameters, then return a representation of that url as AppsStoreUrl and nil error,
+// or return non-nil error otherwise
+func ValidateAppsStoreURL(urlStr string) (*AppsStoreUrl, error) {
 	if len(urlStr) == 0 {
-		return nil, fmt.Errorf("the apps collection url shouldn't be empty")
+		return nil, fmt.Errorf("the apps store url shouldn't be empty")
 	}
 
 	// ignoring the returned error, as this will not happen
@@ -92,11 +93,11 @@ func ValidateAppsCollectionURL(urlStr string) (*AppsStoreUrl, error) {
 
 	colUrl, e := url.Parse(urlStr)
 	if e != nil {
-		return nil, fmt.Errorf("the given url isn't a valid apps collection url, couldn't parse with error: %s", e.Error())
+		return nil, fmt.Errorf("the given url isn't a valid apps store url, couldn't parse with error: %s", e.Error())
 	}
 
 	if colUrl.Host != stdURL.Host || !strings.HasPrefix(colUrl.Path, stdURL.Path) {
-		return nil, fmt.Errorf("the url isn't a valid apps collection url, found '%s'", urlStr)
+		return nil, fmt.Errorf("the url isn't a valid apps store url, found '%s'", urlStr)
 	}
 
 	paths := strings.Split(colUrl.Path, "/")
@@ -105,23 +106,23 @@ func ValidateAppsCollectionURL(urlStr string) (*AppsStoreUrl, error) {
 	if i := findSInA(paths, categoryQualifier); i == -1 {
 		cat = categories.NoCategory
 	} else if i == len(paths)-1 {
-		return nil, fmt.Errorf("the url isn't a valid apps collection url, missing required fields: category name")
+		return nil, fmt.Errorf("the url isn't a valid apps store url, missing required fields: category name")
 	} else {
 		cat = categories.Category(paths[i+1])
 	}
 
 	var col categories.Collection
 	if i := findSInA(paths, collectionQualifier); i == -1 {
-		return nil, fmt.Errorf("the url isn't a valid apps collection url, missing required fields: collection")
+		return nil, fmt.Errorf("the url isn't a valid apps store url, missing required fields: collection")
 	} else if i == len(paths)-1 {
-		return nil, fmt.Errorf("the url isn't a valid apps collection url, missing required fields: collection name")
+		return nil, fmt.Errorf("the url isn't a valid apps store url, missing required fields: collection name")
 	} else {
 		col = categories.Collection(paths[i+1])
 	}
 
 	qParams, e := validateQueryParams(colUrl.Query(), appsCollectionUrlType)
 	if e != nil {
-		return nil, fmt.Errorf("the url isn't a valid apps collection url: %s", e.Error())
+		return nil, fmt.Errorf("the url isn't a valid apps store url: %s", e.Error())
 	}
 
 	return NewAppsStoreUrl(cat, col, qParams.Country, qParams.Lang, qParams.ResultsNum)

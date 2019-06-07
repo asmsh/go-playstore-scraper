@@ -114,7 +114,7 @@ func NewAppUrl(appID string, restParams ...interface{}) (*AppUrl, error) {
 	}
 }
 
-// String func will be called on an instance of 'AppUrl' to return the app url as a string.
+// String returns the app url as a string
 func (appURL AppUrl) String() string {
 	url := AppPageBaseUrl
 
@@ -131,16 +131,13 @@ func (appURL AppUrl) String() string {
 	return url
 }
 
-// AppsStoreUrl holds the url info of a store page(a collection page) before building it
+// AppsStoreUrl holds the required info that represent the url of some collection for some app category,
 type AppsStoreUrl struct {
 	category   categories.Category
 	collection categories.Collection
 	country    locales.Country  // the country of the result page
 	language   locales.Language // the language of the result page
 	resultsNum int              // the number of result per page, max. 120
-	// this is a flag to indicate that the required apps should be free or paid, in case we are searching in a general collection(top charts)
-	// true: free , false: paid
-	//FreeApps bool
 }
 
 // Getters for AppsStoreUrl
@@ -177,7 +174,7 @@ func (storeUrl AppsStoreUrl) ResultsNum() int {
 func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restParams ...interface{}) (*AppsStoreUrl, error) {
 	const errPrefix = "couldn't build the store url:"
 
-	if !IsCategory(cat) {
+	if !(IsGameCategory(cat) || IsAppCategory(cat)) {
 		return nil, fmt.Errorf("%s invalid or unsupported category '%s'", errPrefix, cat)
 	}
 	if !IsCollection(col) {
@@ -290,7 +287,7 @@ func NewAppsStoreUrl(cat categories.Category, col categories.Collection, restPar
 	}
 }
 
-// String func will be called on an instance of 'AppsStoreUrl' to return the store url as a string.
+// String returns the apps store url as a string
 func (storeUrl AppsStoreUrl) String() string {
 	url := AppsStoreBaseUrl
 
