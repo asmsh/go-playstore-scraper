@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	PlayStoreUrl = "https://play.google.com"
 	// AppsStoreBaseUrl is the Play Store apps home page url
 	AppsStoreBaseUrl = "https://play.google.com/store/apps"
 	// AppPageBaseUrl is the base part of the url that displays the details of a single app
