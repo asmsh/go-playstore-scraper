@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	PlayStoreUrl = "https://play.google.com"
 	// AppsStoreBaseUrl is the Play Store apps home page url
 	AppsStoreBaseUrl = "https://play.google.com/store/apps"
 	// AppPageBaseUrl is the base part of the url that displays the details of a single app
@@ -94,9 +95,9 @@ func NewAppUrl(appID string, restParams ...interface{}) (*AppUrl, error) {
 
 		switch param2.(type) {
 		case string:
-			lang = locales.Language(param1.(string))
+			lang = locales.Language(param2.(string))
 		case locales.Language:
-			lang = param1.(locales.Language)
+			lang = param2.(locales.Language)
 		default:
 			return nil, fmt.Errorf("%s the language should be of type 'Language' or 'string', found '%T'", errPrefix, param2)
 		}

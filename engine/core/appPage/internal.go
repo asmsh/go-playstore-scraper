@@ -2,12 +2,13 @@ package appPage
 
 import (
 	"fmt"
+	"github.com/asmsh/go-playstore-scraper/engine/urls"
 	"golang.org/x/net/html"
 	"strings"
 )
 
-const devPageUrlPrefix string = "play.google.com/store/apps/dev"
-const catPageUrlPrefix string = "https://play.google.com/store/apps/category/"
+const devPageUrlPrefix string = "/store/apps/dev"
+const catPageUrlPrefix string = "/store/apps/category/"
 
 func extractIconURL(acTz *html.Tokenizer) ([]string, error) {
 	var iconUrlLoRes, iconUrlHiRes string
@@ -59,8 +60,6 @@ mainLoop:
 						switch {
 						case attr.Key == "class" && attr.Val == "T75of sHb2Xb":
 							signs++
-						case attr.Key == "alt" && attr.Val == "Cover art":
-							signs++
 						case attr.Key == "itemprop" && attr.Val == "image":
 							signs++
 						case attr.Key == "src" && attr.Val != "":
@@ -71,7 +70,7 @@ mainLoop:
 							tmpHiRes = attr.Val
 						}
 					}
-					if signs == 5 {
+					if signs == 4 {
 						tmpHiRes, e := formatHiResImgUrl(tmpHiRes)
 						if e != nil {
 							return nil, e
@@ -226,6 +225,11 @@ mainLoop:
 		return "", "", fmt.Errorf("couldn't find the dev page url or the dev name")
 	}
 
+	devURL, e := updateDevUrl(devURL)
+	if e != nil {
+		return "", "", e
+	}
+
 	return devURL, devName, nil
 }
 
@@ -287,7 +291,12 @@ mainLoop:
 	}
 
 	if catUrl == "" || catName == "" {
-		return "", "", fmt.Errorf("couldn't find the dev page url or the dev name")
+		return "", "", fmt.Errorf("couldn't find the category url or the category name")
+	}
+
+	catUrl, e := updateCatUrl(catUrl)
+	if e != nil {
+		return "", "", e
 	}
 
 	return catUrl, catName, nil
@@ -515,7 +524,7 @@ videoLoop:
 					for _, attr := range t.Attr {
 						switch {
 						/*case attr.Key == "jscontroller" && attr.Val == "HnDLGf":
-							signs++*/
+						signs++*/
 						case attr.Key == "class" && attr.Val == "MMZjL lgooh  ":
 							signs++
 						case attr.Key == "data-trailer-url" && attr.Val != "":
@@ -664,10 +673,10 @@ mainLoop:
 				for _, attr := range t.Attr {
 					switch {
 					/*case attr.Key == "class" && attr.Val == "W4P4ne ":
-						// related to the first method.
-						descContainerFound = true
-						descContainerTagNum = openedTags
-						break*/
+					// related to the first method.
+					descContainerFound = true
+					descContainerTagNum = openedTags
+					break*/
 					case attr.Key == "jsname" && attr.Val == "sngebd":
 						// related to the second method.
 						descContainerFound2 = true
@@ -676,26 +685,26 @@ mainLoop:
 					}
 				}
 			/*case "meta":
-				// this is used as a first method to retrieve the description, which get it from the meta tag.
-				if !descContainerFound || openedTags != descContainerTagNum || len(t.Attr) < 2 {
-					continue mainLoop
-				}
+			// this is used as a first method to retrieve the description, which get it from the meta tag.
+			if !descContainerFound || openedTags != descContainerTagNum || len(t.Attr) < 2 {
+				continue mainLoop
+			}
 
-				var signs uint8
-				var tmp string
-				for _, attr := range t.Attr {
-					switch {
-					case attr.Key == "itemprop" && attr.Val == "description":
-						signs++
-					case attr.Key == "content" && attr.Val != "":
-						signs++
-						tmp = attr.Val
-					}
+			var signs uint8
+			var tmp string
+			for _, attr := range t.Attr {
+				switch {
+				case attr.Key == "itemprop" && attr.Val == "description":
+					signs++
+				case attr.Key == "content" && attr.Val != "":
+					signs++
+					tmp = attr.Val
 				}
-				if signs == 2 {
-					desc = tmp
-					break mainLoop
-				}*/
+			}
+			if signs == 2 {
+				desc = tmp
+				break mainLoop
+			}*/
 			default:
 				handleDefaultStartTagToken(t)
 			}
@@ -1126,4 +1135,22 @@ func formatHiResImgUrl(rawUrl string) (string, error) {
 
 	// unexpected url pattern, so return the raw url as it is
 	return rawUrl, nil
+}
+
+func updateDevUrl(oldUrl string) (newUrl string, err error) {
+	if strings.HasPrefix(oldUrl, devPageUrlPrefix) {
+		newUrl = urls.PlayStoreUrl + oldUrl
+	} else {
+		return "", fmt.Errorf("unexpected dev url")
+	}
+	return
+}
+
+func updateCatUrl(oldUrl string) (newUrl string, err error) {
+	if strings.HasPrefix(oldUrl, catPageUrlPrefix) {
+		newUrl = urls.PlayStoreUrl + oldUrl
+	} else {
+		return "", fmt.Errorf("unexpected category url")
+	}
+	return
 }

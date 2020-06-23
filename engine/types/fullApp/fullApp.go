@@ -3,6 +3,7 @@ package fullApp
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // the base part of the url for an app page
@@ -11,14 +12,14 @@ const appPageBaseUrl = "https://play.google.com/store/apps/details?id="
 // the attributes that are written in uppercase letters will be exported to the ToJSON
 type FullApp struct {
 	// this is the id of this app, i.e. the apk name
-	AppID string `json:",omitempty"`
+	AppID  string `json:",omitempty"`
 	AppUrl string `json:",omitempty"`
 	// image url at the first index is the default(low res) image, and image at the second index is a higher res one.
-	IconUrls []string `json:",omitempty"`
-	AppName string `json:",omitempty"`
-	DevName string `json:",omitempty"`
-	DevPageUrl string `json:",omitempty"`
-	Category string `json:",omitempty"`
+	IconUrls   []string `json:",omitempty"`
+	AppName    string   `json:",omitempty"`
+	DevName    string   `json:",omitempty"`
+	DevPageUrl string   `json:",omitempty"`
+	Category   string   `json:",omitempty"`
 
 	// TODO, handle the sec category(additional family category) extraction.
 	//this is a second optional category that some apps and games implement
@@ -40,7 +41,7 @@ type FullApp struct {
 	// by that populating pattern, every url at even index(index starts at 0) will be a lower resolution one,
 	// and every url at odd index will be a high resolution one.
 	ScreenShotsUrls []string `json:",omitempty"`
-	Description string `json:",omitempty"`
+	Description     string   `json:",omitempty"`
 	// the rating of this app got, the aggregate rating
 	Rating string `json:",omitempty"`
 	// the number of users that rated this app
@@ -54,7 +55,7 @@ type FullApp struct {
 	// TODO
 	// the date of the last update for this app
 	LastUpdated string `json:",omitempty"`
-	Size string `json:",omitempty"`
+	Size        string `json:",omitempty"`
 	// the number of downloads for this app
 	NumOfDownloads string `json:",omitempty"`
 	// the version of the current update (app)
@@ -187,4 +188,29 @@ func (app *FullApp) ToJSON() (string, error) {
 	}
 
 	return string(ba), nil
+}
+
+func (app *FullApp) String() string {
+	sb := strings.Builder{}
+
+	sb.WriteString(fmt.Sprintf("AppID: %q\n", app.AppID))
+	sb.WriteString(fmt.Sprintf("AppUrl: %q\n", app.AppUrl))
+	sb.WriteString(fmt.Sprintf("IconUrls: %q\n", app.IconUrls))
+	sb.WriteString(fmt.Sprintf("AppName: %q\n", app.AppName))
+	sb.WriteString(fmt.Sprintf("DevName: %q\n", app.DevName))
+	sb.WriteString(fmt.Sprintf("DevPageUrl: %q\n", app.DevPageUrl))
+	sb.WriteString(fmt.Sprintf("Category: %q\n", app.Category))
+	sb.WriteString(fmt.Sprintf("InAppOffering: %q\n", app.InAppOffering))
+	sb.WriteString(fmt.Sprintf("Price: %q\n", app.Price))
+	sb.WriteString(fmt.Sprintf("VideoTrailerUrls: %q\n", app.VideoTrailerUrls))
+	sb.WriteString(fmt.Sprintf("ScreenShotsUrls: %q\n", app.ScreenShotsUrls))
+	sb.WriteString(fmt.Sprintf("Description: %q\n", app.Description))
+	sb.WriteString(fmt.Sprintf("Rating: %q\n", app.Rating))
+	sb.WriteString(fmt.Sprintf("RatingCount: %q\n", app.RatingCount))
+	sb.WriteString(fmt.Sprintf("RatingHistogram: %q\n", app.RatingHistogram))
+	sb.WriteString(fmt.Sprintf("WhatsNew: %q\n", app.WhatsNew))
+
+	// TODO, update this function after implementing the missing fields
+
+	return sb.String()
 }
