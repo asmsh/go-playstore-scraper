@@ -46,11 +46,11 @@ func ParseApp(appUrl *urls.AppUrl, fields ...appField.AppField) (*fullApp.FullAp
 func ParseAppByUrl(url string, fields ...appField.AppField) (*fullApp.FullApp, error) {
 	appUrl, e := urls.ValidateAppPageURL(url)
 	if e != nil {
-		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
 	}
 
 	if app, e := parseAppPage(appUrl, fields); e != nil {
-		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
 	} else {
 		return app, nil
 	}
@@ -62,7 +62,7 @@ func requestAppPage(url string) (*http.Response, error) {
 		return nil, fmt.Errorf("error with requesting the url: \n" + e.Error())
 	}
 
-	//TODO, feat: handle the possible responses
+	// TODO, feat: handle the possible responses
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
 		return nil, fmt.Errorf("error with requesting the url: \n"+"response status is: %s", resp.Status)
@@ -77,7 +77,7 @@ func parseAppPage(appUrl *urls.AppUrl, fields []appField.AppField) (*fullApp.Ful
 
 	fields, e = appField.ValidateAppFields(fields)
 	if e != nil {
-		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
 	}
 
 	url := appUrl.String()
@@ -111,7 +111,7 @@ func parseAppPage(appUrl *urls.AppUrl, fields []appField.AppField) (*fullApp.Ful
 	}
 	app, e = parseAppContent(tz, fields)
 	if e != nil {
-		return nil, fmt.Errorf("failed to retreive the app info with error: %s", e.Error())
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
 	}
 
 ret:

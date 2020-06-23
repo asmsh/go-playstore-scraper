@@ -1110,7 +1110,7 @@ func handleDefaultEndTagToken(t html.Token) {
 
 func formatHiResImgUrl(rawUrl string) (string, error) {
 	if len(rawUrl) == 0 {
-		return "", fmt.Errorf("can't format image url of lenght zero")
+		return "", fmt.Errorf("can't format image url of length zero")
 	} else if len(rawUrl) < 12 {
 		// to prevent short urls from causing the app to panic
 		return "", fmt.Errorf("can't format image url of unknown structure")
