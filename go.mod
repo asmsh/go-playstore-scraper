@@ -1,3 +1,3 @@
 module github.com/asmsh/go-playstore-scraper
 
-require golang.org/x/net v0.0.0-20190522155817-f3200d17e092
+require golang.org/x/net v0.0.0-20200625001655-4c5254603344
