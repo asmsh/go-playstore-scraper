@@ -147,3 +147,38 @@ const (
 	Zambia     Country = "zm"
 	Zimbabwe   Country = "zw"
 )
+
+// AllCountries is an array of all the country codes available in this package
+var AllCountries = [...]Country{
+	DefCountry, Albania, Algeria, Angola,
+	AntiguaAndBarbuda, Argentina, Armenia, Aruba,
+	Australia, Austria, Azerbaijan, Bahamas,
+	Bahrain, Bangladesh, Belarus, Belgium,
+	Belize, Benin, Bolivia, BosniaAndHerzegovina,
+	Botswana, Brazil, Bulgaria, BurkinaFaso,
+	Cambodia, Cameroon, Canada, CapeVerde,
+	Chile, Colombia, CostaRica, CoteDIvoire,
+	Croatia, Cyprus, CzechRepublic, Denmark,
+	DominicanRepublic, Ecuador, Egypt, ElSalvador,
+	Estonia, Fiji, Finland, France, Gabon,
+	Germany, Ghana, Greece, Guatemala,
+	GuineaBissau, Haiti, Honduras, HongKong,
+	Hungary, Iceland, India, Indonesia, Ireland,
+	Italy, Jamaica, Japan, Jordan, Kazakhstan,
+	Kenya, Kuwait, Kyrgyzstan, Laos, Latvia,
+	Lebanon, Liechtenstein, Lithuania, Luxembourg,
+	Macedonia, Malaysia, Mali, Malta, Mauritius,
+	Mexico, Moldova, Morocco, Mozambique, Namibia,
+	Nepal, Netherlands, NetherlandsAntilles, NewZealand,
+	Nicaragua, Niger, Nigeria, Norway, Oman,
+	Pakistan, Panama, PapuaNewGuinea, Paraguay,
+	Peru, Philippines, Poland, Portugal, Qatar,
+	Romania, Russia, Rwanda, SaudiArabia, Senegal,
+	Serbia, Singapore, Slovakia, Slovenia, SouthAfrica,
+	SouthKorea, Spain, SriLanka, Sweden, Switzerland,
+	Taiwan, Tajikistan, Tanzania, Thailand, Togo,
+	TrinidadAndTobago, Tunisia, Turkey, Turkmenistan,
+	UAE, Uganda, UK, Ukraine, Uruguay,
+	US, Uzbekistan, Venezuela, Vietnam, Yemen,
+	Zambia, Zimbabwe,
+}

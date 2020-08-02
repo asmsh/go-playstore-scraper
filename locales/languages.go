@@ -124,3 +124,39 @@ const (
 	ChineseTraditional       Language = "zh_TW"
 	Zulu                     Language = "zu"
 )
+
+// AllLanguages is an array of all the language codes available in this package
+var AllLanguages = [...]Language{
+	DefLanguage, Afrikaans, Amharic, Arabic,
+	Azeri, Belarusian, Bulgarian, Bengali,
+	Bosnian, Catalan, Czech, Danish,
+	German, GermanAustria, GermanSwitzerland,
+	Greek, English, EnglishAustralia,
+	EnglishCanada, EnglishUK, EnglishIreland,
+	EnglishIndia, EnglishSingapore, EnglishUS,
+	EnglishSouthAfrica, Spanish, SpanishLatinAmerica,
+	SpanishArgentina, SpanishBolivia, SpanishChile,
+	SpanishColombia, SpanishCostaRica, SpanishDominicanRepublic,
+	SpanishEcuador, SpanishSpain, SpanishGuatemala,
+	SpanishHonduras, SpanishMexico, SpanishNicaragua,
+	SpanishPanama, SpanishPeru, SpanishPuertoRico,
+	SpanishParaguay, SpanishElSalvador, SpanishUS,
+	SpanishUruguay, SpanishVenezuela, Estonian,
+	Basque, Farsi, Finnish, Filipino,
+	French, FrenchCanada, FrenchFrance, FrenchSwitzerland,
+	Galician, SwissGerman, Gujarati, Hebrew,
+	Hindi, Croatian, Hungarian, Armenian,
+	Indonesian, Indonesian2, Icelandic, Italian,
+	Japanese, Georgian, Kazakh, Khmer, Kannada,
+	Korean, Kyrgyz, Lingala, Lao, Lithuanian,
+	Latvian, Macedonian, Malayalam, Mongolian,
+	Marathi, Malay, Burmese, NorwegianBokmal,
+	Nepali, Dutch, Norwegian, Punjabi, Polish,
+	Portuguese, PortugueseBrazil, PortuguesePortugal,
+	Romanian, Russian, Sinhala, Slovak, Slovenian,
+	Albanian, Serbian, SerbianLatin, Swedish,
+	Swahili, Tamil, Telugu, Thai, Tagalog,
+	Turkish, Ukrainian, Urdu, Uzbek, Vietnamese,
+	Chinese, ChineseSimplified, ChineseHongKong,
+	ChineseTraditional, Zulu,
+}
