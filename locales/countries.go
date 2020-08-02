@@ -6,7 +6,7 @@ type Country string
 const DefCountry Country = ""
 
 const (
-	Albania              Country = "dz"
+	Albania              Country = "al"
 	Algeria              Country = "dz"
 	Angola               Country = "ao"
 	AntiguaAndBarbuda    Country = "ag"
