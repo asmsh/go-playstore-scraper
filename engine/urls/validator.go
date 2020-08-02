@@ -228,32 +228,6 @@ func IsCollection(col categories.Collection) bool {
 	return false
 }
 
-func IsValidCountry(c locales.Country) bool {
-	if len(c) == 0 {
-		return false
-	}
-
-	for _, v := range locales.Countries {
-		if v == c {
-			return true
-		}
-	}
-	return false
-}
-
-func IsValidLanguage(l locales.Language) bool {
-	if len(l) == 0 {
-		return false
-	}
-
-	for _, v := range locales.Languages {
-		if v == l {
-			return true
-		}
-	}
-	return false
-}
-
 func IsValidResultNum(n int) bool {
 	return n >= 0 && n <= 120
 }
