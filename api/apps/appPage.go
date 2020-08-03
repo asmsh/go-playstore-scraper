@@ -38,46 +38,36 @@ func parseAppPage(appUrl *urls.AppUrl, appFields []fields.AppField) (*AppInfo, e
 		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", err.Error())
 	}
 
-	url := appUrl.String()
+	urlStr := appUrl.String()
 
-	resp, err := requestAppPage(url)
+	app := new(AppInfo)
+	app.Country = appUrl.Country()
+	app.Language = appUrl.Language()
+	if appFields[0] == fields.AppId {
+		app.AppId = appUrl.AppId()
+		appFields = appFields[1:]
+	}
+	if len(appFields) > 0 && appFields[0] == fields.AppUrl {
+		app.AppUrl = urlStr
+		appFields = appFields[1:]
+	}
+
+	if len(appFields) == 0 {
+		return app, nil
+	}
+
+	resp, err := requestAppPage(urlStr)
 	if err != nil {
 		return nil, fmt.Errorf("error with parsing the app page: " + err.Error())
 	}
 	defer resp.Body.Close()
 
 	tz := html.NewTokenizer(resp.Body)
-
-	var tmpID, tmpURL string
-	app := new(AppInfo)
-
-	app.Country = appUrl.Country()
-	app.Language = appUrl.Language()
-
-	if appFields[0] == fields.AppId {
-		tmpID = appUrl.AppId()
-		if len(appFields) > 1 {
-			appFields = appFields[1:]
-		} else {
-			goto ret
-		}
-	}
-	if appFields[0] == fields.AppUrl {
-		tmpURL = url
-		if len(appFields) > 1 {
-			appFields = appFields[1:]
-		} else {
-			goto ret
-		}
-	}
 	err = parseAppContent(tz, app, appFields)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", err.Error())
 	}
 
-ret:
-	app.AppId = tmpID
-	app.AppUrl = tmpURL
 	return app, nil
 
 }
