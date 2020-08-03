@@ -11,10 +11,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-func parseApp(appUrl *urls.AppUrl, fields ...fields.AppField) (*AppInfo, error) {
-	return parseAppPage(appUrl, fields)
-}
-
 func requestAppPage(url string) (*http.Response, error) {
 	resp, e := http.Get(url)
 	if e != nil {

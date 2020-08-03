@@ -12,7 +12,7 @@ func GetAppById(appId string, fields ...fields.AppField) (*AppInfo, error) {
 		return nil, e
 	}
 
-	return parseApp(appUrl, fields...)
+	return parseAppPage(appUrl, fields)
 }
 
 func GetAppByIdAdv(appId string, country locales.Country, language locales.Language, fields ...fields.AppField) (*AppInfo, error) {
@@ -21,7 +21,7 @@ func GetAppByIdAdv(appId string, country locales.Country, language locales.Langu
 		return nil, e
 	}
 
-	return parseApp(appUrl, fields...)
+	return parseAppPage(appUrl, fields)
 }
 
 func GetAppByUrl(url string, fields ...fields.AppField) (*AppInfo, error) {
@@ -30,5 +30,5 @@ func GetAppByUrl(url string, fields ...fields.AppField) (*AppInfo, error) {
 		return nil, e
 	}
 
-	return parseApp(appUrl, fields...)
+	return parseAppPage(appUrl, fields)
 }
