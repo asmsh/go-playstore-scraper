@@ -595,15 +595,13 @@ screenshotsLoop:
 					case attr.Key == "srcset" && attr.Val != "":
 						signs++
 						tmpSrcset = attr.Val
-					case attr.Key == "alt" && attr.Val == "Screenshot Image":
+					case attr.Key == "class" && attr.Val == "T75of DYfLw":
 						signs++
-						/*case attr.Key == "class" && attr.Val == "T75of DYfLw":
-							signs++
-						case attr.Key == "itemprop" && attr.Val == "image":
-							signs++*/
+					case attr.Key == "itemprop" && attr.Val == "image":
+						signs++
 					}
 				}
-				if signs == 3 {
+				if signs == 4 {
 					highRes, e := formatHiResImgUrl(tmpSrcset)
 					if e != nil {
 						highRes = tmpSrcset
