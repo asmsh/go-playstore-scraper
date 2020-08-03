@@ -56,7 +56,7 @@ func (f sortableAppFields) Less(i, j int) bool { return f[i] < f[j] }
 func (f sortableAppFields) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 
 var allFields = []fields.AppField{
-	fields.AllFields, fields.AppId, fields.AppUrl, fields.IconUrls,
+	fields.AllFields, fields.AppUrl, fields.AppId, fields.IconUrls,
 	fields.AppName, fields.DevInfo, fields.Category, fields.FamilyCategory,
 	fields.InAppExperience, fields.Price, fields.VideoTrailerUrls,
 	fields.ScreenShotsUrls, fields.Description, fields.Rating,

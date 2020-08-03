@@ -39,12 +39,12 @@ func parseAppPage(appUrl *urls.AppUrl, appFields []fields.AppField) (*AppInfo, e
 	app := new(AppInfo)
 	app.Country = appUrl.Country()
 	app.Language = appUrl.Language()
-	if appFields[0] == fields.AppId {
-		app.AppId = appUrl.AppId()
-		appFields = appFields[1:]
-	}
 	if len(appFields) > 0 && appFields[0] == fields.AppUrl {
 		app.AppUrl = urlStr
+		appFields = appFields[1:]
+	}
+	if len(appFields) > 0 && appFields[0] == fields.AppId {
+		app.AppId = appUrl.AppId()
 		appFields = appFields[1:]
 	}
 

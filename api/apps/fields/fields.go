@@ -10,12 +10,12 @@ type AppField int
 const (
 	// AllFields will extract all the fields of the app.
 	AllFields AppField = iota
-	// AppId will extract only the app id of the app, and populate the
-	// AppInfo.AppId field with the data.
-	AppId
 	// AppUrl will extract only the url of the app, and populate the
 	// AppInfo.AppUrl field with the data.
 	AppUrl
+	// AppId will extract only the app id of the app, and populate the
+	// AppInfo.AppId field with the data.
+	AppId
 	// IconUrls will extract only the urls of the icon image of the app,
 	// and populate the AppInfo.IconUrls field with the data.
 	IconUrls

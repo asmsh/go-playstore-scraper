@@ -23,11 +23,11 @@ type AppInfo struct {
 	// was chosen.
 	Language locales.Language
 
-	// AppId is the id of this app, i.e. the apk name.
-	AppId string `json:",omitempty"`
 	// AppUrl is the url of this app info instance, which is the url
 	// that's used to extract these values from.
 	AppUrl string `json:",omitempty"`
+	// AppId is the id of this app, i.e. the apk name.
+	AppId string `json:",omitempty"`
 	// IconUrls holds the different urls of the icon image. It has two
 	// elements, the first is the url of the default(low resolution) icon
 	// image, and the second is the url of a higher resolution icon image.
