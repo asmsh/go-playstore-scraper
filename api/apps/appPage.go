@@ -3,7 +3,6 @@ package apps
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/asmsh/go-playstore-scraper/api/apps/fields"
 	"github.com/asmsh/go-playstore-scraper/api/apps/internal/appPage"
@@ -11,30 +10,6 @@ import (
 	"github.com/asmsh/go-playstore-scraper/api/apps/urls"
 	"golang.org/x/net/html"
 )
-
-// a global var to track the element num for the required fields
-var totalTagsCounter uint64 = 0
-var openedTags int64 = 0
-
-func parseAppFromFileDebugOnly(filePath string, fields ...fields.AppField) (*AppInfo, uint64, int64, error) {
-	file, e := os.Open(filePath)
-	if e != nil {
-		return nil, 0, 0, e
-	}
-
-	fields, e = validator.ValidateAppFields(fields)
-	if e != nil {
-		return nil, 0, 0, fmt.Errorf("error validating the required app fields")
-	}
-
-	tz := html.NewTokenizer(file)
-	totalTagsCounter = 0
-	openedTags = 0
-
-	app, e := parseAppContent(tz, fields)
-
-	return app, totalTagsCounter, openedTags, e
-}
 
 func parseApp(appUrl *urls.AppUrl, fields ...fields.AppField) (*AppInfo, error) {
 	return parseAppPage(appUrl, fields)
@@ -56,26 +31,24 @@ func requestAppPage(url string) (*http.Response, error) {
 }
 
 func parseAppPage(appUrl *urls.AppUrl, appFields []fields.AppField) (*AppInfo, error) {
-	var e error
-	var tmpID, tmpURL string
+	var err error
 
-	appFields, e = validator.ValidateAppFields(appFields)
-	if e != nil {
-		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
+	appFields, err = validator.ValidateAppFields(appFields)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", err.Error())
 	}
 
 	url := appUrl.String()
 
-	resp, e := requestAppPage(url)
-	if e != nil {
-		return nil, fmt.Errorf("error with parsing the app page: " + e.Error())
+	resp, err := requestAppPage(url)
+	if err != nil {
+		return nil, fmt.Errorf("error with parsing the app page: " + err.Error())
 	}
 	defer resp.Body.Close()
 
 	tz := html.NewTokenizer(resp.Body)
-	totalTagsCounter = 0
-	openedTags = 0
 
+	var tmpID, tmpURL string
 	app := new(AppInfo)
 	if appFields[0] == fields.AppId {
 		tmpID = appUrl.AppId()
@@ -93,9 +66,9 @@ func parseAppPage(appUrl *urls.AppUrl, appFields []fields.AppField) (*AppInfo, e
 			goto ret
 		}
 	}
-	app, e = parseAppContent(tz, appFields)
-	if e != nil {
-		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", e.Error())
+	err = parseAppContent(tz, app, appFields)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve the app info with error: %s", err.Error())
 	}
 
 ret:
@@ -105,9 +78,7 @@ ret:
 
 }
 
-func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInfo, error) {
-	var app = new(AppInfo)
-
+func parseAppContent(acTz *html.Tokenizer, app *AppInfo, appFields []fields.AppField) error {
 	for idx, currField := range appFields {
 		var prevField, nextField fields.AppField
 
@@ -124,21 +95,21 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 		case currField == fields.IconUrls:
 			iconUrls, e := appPage.ExtractIconURL(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the icon url: " + e.Error())
+				return fmt.Errorf("error getting the icon url: " + e.Error())
 			}
 			app.IconUrls = iconUrls
 
 		case currField == fields.AppName:
 			appName, e := appPage.ExtractAppName(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the app name: " + e.Error())
+				return fmt.Errorf("error getting the app name: " + e.Error())
 			}
 			app.AppName = appName
 
 		case currField == fields.DevInfo:
 			devUrl, devName, e := appPage.ExtractDevInfo(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the developer info: " + e.Error())
+				return fmt.Errorf("error getting the developer info: " + e.Error())
 			}
 
 			app.DevName = devName
@@ -147,21 +118,21 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 		case currField == fields.Category:
 			_, catName, e := appPage.ExtractCategoryInfo(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the category info: " + e.Error())
+				return fmt.Errorf("error getting the category info: " + e.Error())
 			}
 			app.Category = catName
 
 		case currField == fields.InAppExperience:
 			offeringString, e := appPage.ExtractInAppOffering(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the in app offering info: " + e.Error())
+				return fmt.Errorf("error getting the in app offering info: " + e.Error())
 			}
 			app.InAppExperience = offeringString
 
 		case currField == fields.Price:
 			price, e := appPage.ExtractPrice(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the app price: " + e.Error())
+				return fmt.Errorf("error getting the app price: " + e.Error())
 			}
 			app.Price = price
 
@@ -169,7 +140,7 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 			if prevField != fields.VideoTrailerUrls {
 				videoUrls, imagesUrls, e := appPage.ExtractMediaUrls(acTz)
 				if e != nil {
-					return nil, fmt.Errorf("error getting the app media urls: " + e.Error())
+					return fmt.Errorf("error getting the app media urls: " + e.Error())
 				}
 				if currField == fields.VideoTrailerUrls {
 					app.VideoTrailerUrls = videoUrls
@@ -186,7 +157,7 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 		case currField == fields.Description:
 			appDesc, e := appPage.ExtractDescription(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the app's description: " + e.Error())
+				return fmt.Errorf("error getting the app's description: " + e.Error())
 			}
 			app.Description = appDesc
 
@@ -194,7 +165,7 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 			if prevField != fields.Rating {
 				rating, ratingCount, e := appPage.ExtractRatingInfo(acTz)
 				if e != nil {
-					return nil, fmt.Errorf("error getting the app's rating info: " + e.Error())
+					return fmt.Errorf("error getting the app's rating info: " + e.Error())
 				}
 				if currField == fields.Rating {
 					app.Rating = rating
@@ -211,18 +182,18 @@ func parseAppContent(acTz *html.Tokenizer, appFields []fields.AppField) (*AppInf
 		case currField == fields.RatingHistogram:
 			histogram, e := appPage.ExtractRatingHistogram(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the app's histogram: " + e.Error())
+				return fmt.Errorf("error getting the app's histogram: " + e.Error())
 			}
 			app.RatingHistogram = histogram
 
 		case currField == fields.WhatsNew:
 			whatsNew, e := appPage.ExtractWhatsNew(acTz)
 			if e != nil {
-				return nil, fmt.Errorf("error getting the app's whatsnew: " + e.Error())
+				return fmt.Errorf("error getting the app's whatsnew: " + e.Error())
 			}
 			app.WhatsNew = whatsNew
 		}
 	}
 
-	return app, nil
+	return nil
 }
