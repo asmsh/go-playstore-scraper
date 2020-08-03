@@ -3,7 +3,7 @@ package urls_test
 import (
 	"testing"
 
-	"github.com/asmsh/go-playstore-scraper/api/apps/urls"
+	"github.com/asmsh/go-playstore-scraper/api/apps/internal/urls"
 	"github.com/asmsh/go-playstore-scraper/locales"
 )
 
