@@ -6,8 +6,8 @@ import (
 
 	"github.com/asmsh/go-playstore-scraper/api/apps/fields"
 	"github.com/asmsh/go-playstore-scraper/api/apps/internal/appPage"
-	"github.com/asmsh/go-playstore-scraper/api/apps/internal/urls"
 	"github.com/asmsh/go-playstore-scraper/api/apps/internal/validator"
+	"github.com/asmsh/go-playstore-scraper/api/apps/urls"
 	"golang.org/x/net/html"
 )
 
