@@ -2,15 +2,21 @@ package appPage
 
 import (
 	"fmt"
-	"github.com/asmsh/go-playstore-scraper/engine/urls"
-	"golang.org/x/net/html"
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
-const devPageUrlPrefix string = "/store/apps/dev"
-const catPageUrlPrefix string = "/store/apps/category/"
+const (
+	playStoreUrl     = "https://play.google.com"
+	devPageUrlPrefix = "/store/apps/dev"
+	catPageUrlPrefix = "/store/apps/category/"
+)
 
-func extractIconURL(acTz *html.Tokenizer) ([]string, error) {
+var totalTagsCounter uint64 = 0
+var openedTags int64 = 0
+
+func ExtractIconURL(acTz *html.Tokenizer) ([]string, error) {
 	var iconUrlLoRes, iconUrlHiRes string
 	var iconUrls = []string{"", ""}
 	var containerFound bool
@@ -100,7 +106,7 @@ mainLoop:
 	return iconUrls, nil
 }
 
-func extractAppName(acTz *html.Tokenizer) (string, error) {
+func ExtractAppName(acTz *html.Tokenizer) (string, error) {
 	var appName string
 	var containerFound bool
 	var innerContainerFound bool
@@ -170,7 +176,7 @@ mainLoop:
 }
 
 // (devURL, devName, error)
-func extractDevInfo(acTz *html.Tokenizer) (string, string, error) {
+func ExtractDevInfo(acTz *html.Tokenizer) (string, string, error) {
 	var devName, devURL string
 	var containerFound bool
 	var containerTagNum int64
@@ -234,7 +240,7 @@ mainLoop:
 }
 
 // (catUrl, catName, err)
-func extractCategoryInfo(acTz *html.Tokenizer) (string, string, error) {
+func ExtractCategoryInfo(acTz *html.Tokenizer) (string, string, error) {
 	var catUrl, catName string
 	var containerFound bool
 	var containerTagNum int64
@@ -303,7 +309,7 @@ mainLoop:
 }
 
 // (containsAds, inAppPurchase, error)
-func extractInAppOffering(acTz *html.Tokenizer) (string, error) {
+func ExtractInAppOffering(acTz *html.Tokenizer) (string, error) {
 	var offeringString = ""
 	var containerFound bool
 	var containerTagNum int64
@@ -362,7 +368,7 @@ mainLoop:
 	}
 }
 
-func extractPrice(acTz *html.Tokenizer) (string, error) {
+func ExtractPrice(acTz *html.Tokenizer) (string, error) {
 	var price string
 	var containerFound bool
 	var containerTagNum int64
@@ -438,7 +444,7 @@ mainLoop:
 	return price, nil
 }
 
-func extractMediaUrls(acTz *html.Tokenizer) ([]string, []string, error) {
+func ExtractMediaUrls(acTz *html.Tokenizer) ([]string, []string, error) {
 	var startImgUrl, videoUrl string
 	var videoURLs = []string{"", ""}
 	var imagesURLs = make([]string, 0, 30)
@@ -637,7 +643,7 @@ screenshotsLoop:
 	}
 }
 
-func extractDescription(acTz *html.Tokenizer) (string, error) {
+func ExtractDescription(acTz *html.Tokenizer) (string, error) {
 	/*var descContainerFound bool
 	var descContainerTagNum int64
 	var desc = ""*/
@@ -737,7 +743,7 @@ mainLoop:
 	}
 }
 
-func extractRatingInfo(acTz *html.Tokenizer) (string, string, error) {
+func ExtractRatingInfo(acTz *html.Tokenizer) (string, string, error) {
 	var ratingContainerFound bool
 	var ratingContainerTagNum int64
 	var ratingCountOuterContainerFound bool
@@ -865,7 +871,7 @@ ratingCountLoop:
 	return rating, ratingCount, nil
 }
 
-func extractRatingHistogram(acTz *html.Tokenizer) (map[string]string, error) {
+func ExtractRatingHistogram(acTz *html.Tokenizer) (map[string]string, error) {
 	var histogramContainerFound bool
 	var histogramContainerTagNum int64
 	var barNumContainerFound bool
@@ -955,7 +961,7 @@ mainLoop:
 	}
 }
 
-func extractWhatsNew(acTz *html.Tokenizer) (string, error) {
+func ExtractWhatsNew(acTz *html.Tokenizer) (string, error) {
 	var wnOuterContainerFound bool // whatsNewOuterContainer
 	var wnOuterContainerTagNum int64
 	var wnInnerContainerFound bool
@@ -1043,7 +1049,7 @@ mainLoop:
 			if whatsNewDataFound {
 				whatsNew = acTz.Token().Data
 				break mainLoop
-				//whatsNewDataFound = false
+				// whatsNewDataFound = false
 			}
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
@@ -1129,7 +1135,7 @@ func formatHiResImgUrl(rawUrl string) (string, error) {
 		var newUrl = url[:iconImgSizeQFi]
 		return newUrl, nil
 	} else if strings.Contains(ssImgSizeStr, "w") && strings.Contains(ssImgSizeStr, "h") {
-		// TODO, explore any possible res editing for this pattern
+		// TODO, explore any possible resolution changing for this pattern
 		return url, nil
 	}
 
@@ -1139,7 +1145,7 @@ func formatHiResImgUrl(rawUrl string) (string, error) {
 
 func updateDevUrl(oldUrl string) (newUrl string, err error) {
 	if strings.HasPrefix(oldUrl, devPageUrlPrefix) {
-		newUrl = urls.PlayStoreUrl + oldUrl
+		newUrl = playStoreUrl + oldUrl
 	} else {
 		return "", fmt.Errorf("unexpected dev url")
 	}
@@ -1148,7 +1154,7 @@ func updateDevUrl(oldUrl string) (newUrl string, err error) {
 
 func updateCatUrl(oldUrl string) (newUrl string, err error) {
 	if strings.HasPrefix(oldUrl, catPageUrlPrefix) {
-		newUrl = urls.PlayStoreUrl + oldUrl
+		newUrl = playStoreUrl + oldUrl
 	} else {
 		return "", fmt.Errorf("unexpected category url")
 	}
