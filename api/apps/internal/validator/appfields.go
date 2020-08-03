@@ -18,15 +18,17 @@ func ValidateAppFields(appFields []fields.AppField) ([]fields.AppField, error) {
 
 	sort.Stable(sortableAppFields(appFields))
 
-	var retFields = []fields.AppField{appFields[0]}
-	for _, f := range appFields {
-		if !isValidAppInfoField(f) {
+	var retFields = make([]fields.AppField, 0, len(appFields))
+	retFields = append(retFields, appFields[0])
+	for idx := range appFields {
+		// validate each field
+		if !isValidAppInfoField(appFields[idx]) {
 			return nil, fmt.Errorf("unsupported app field")
 		}
 
 		// remove duplicate fields
-		if f != retFields[len(retFields)-1] {
-			retFields = append(retFields, f)
+		if appFields[idx] != retFields[len(retFields)-1] {
+			retFields = append(retFields, appFields[idx])
 		}
 	}
 
