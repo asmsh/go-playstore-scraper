@@ -1,31 +1,34 @@
 package apps
 
 import (
-	"github.com/asmsh/go-playstore-scraper/engine/core/appPage"
-	"github.com/asmsh/go-playstore-scraper/engine/types/appField"
-	"github.com/asmsh/go-playstore-scraper/engine/types/fullApp"
-	"github.com/asmsh/go-playstore-scraper/engine/urls"
-	"github.com/asmsh/go-playstore-scraper/engine/urls/locales"
+	"github.com/asmsh/go-playstore-scraper/api/apps/fields"
+	"github.com/asmsh/go-playstore-scraper/api/apps/urls"
+	"github.com/asmsh/go-playstore-scraper/locales"
 )
 
-func GetAppByID(appID string, fields ...appField.AppField) (*fullApp.FullApp, error) {
-	url, e := urls.NewAppUrl(appID)
+func GetAppById(appId string, fields ...fields.AppField) (*AppInfo, error) {
+	appUrl, e := urls.NewAppUrl(appId, locales.DefCountry, locales.DefLanguage)
 	if e != nil {
 		return nil, e
 	}
 
-	return appPage.ParseApp(url, fields...)
+	return parseApp(appUrl, fields...)
 }
 
-func GetAppByIDAdv(appID string, country locales.Country, language locales.Language, fields ...appField.AppField) (*fullApp.FullApp, error) {
-	url, e := urls.NewAppUrl(appID, country, language)
+func GetAppByIdAdv(appId string, country locales.Country, language locales.Language, fields ...fields.AppField) (*AppInfo, error) {
+	appUrl, e := urls.NewAppUrl(appId, country, language)
 	if e != nil {
 		return nil, e
 	}
 
-	return appPage.ParseApp(url, fields...)
+	return parseApp(appUrl, fields...)
 }
 
-func GetAppByUrl(url string, fields ...appField.AppField) (*fullApp.FullApp, error) {
-	return appPage.ParseAppByUrl(url, fields...)
+func GetAppByUrl(url string, fields ...fields.AppField) (*AppInfo, error) {
+	appUrl, e := urls.NewAppUrlFrom(url)
+	if e != nil {
+		return nil, e
+	}
+
+	return parseApp(appUrl, fields...)
 }
