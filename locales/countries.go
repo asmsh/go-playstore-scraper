@@ -3,6 +3,9 @@ package locales
 // Country is the country code which the playstore supports.
 type Country string
 
+// DefCountry doesn't represent a specific country, it's equivalent to
+// setting the country to the one of the host making the requests, as
+// seen by the store.
 const DefCountry Country = ""
 
 const (

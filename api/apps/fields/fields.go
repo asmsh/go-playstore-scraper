@@ -5,8 +5,8 @@ package fields
 // like app name, dev name, icon url, ...
 type AppField int
 
-// The order(and hence the values) of these constants may change in future,
-// so always use the values through this package.
+// The order(and hence the values) of these constants may change in the
+// future, so always use the values through this package.
 const (
 	// AllFields will extract all the fields of the app.
 	AllFields AppField = iota

@@ -32,7 +32,7 @@ func ValidateAppFields(appFields []fields.AppField) ([]fields.AppField, error) {
 		}
 	}
 
-	// if the AllFields value is provided, then populate the returned array with all the fields.
+	// if the fields.AllFields value is provided, then return all the fields.
 	if appFields[0] == fields.AllFields {
 		return allFields[1:], nil
 	}

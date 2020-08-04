@@ -3,6 +3,9 @@ package locales
 // Language is the language code which the playstore supports.
 type Language string
 
+// DefLanguage doesn't represent a specific language, it's equivalent to
+// setting the language to the one of the host making the requests, as
+// seen by the store.
 const DefLanguage Language = ""
 
 const (

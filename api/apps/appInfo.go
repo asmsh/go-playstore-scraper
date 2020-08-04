@@ -12,7 +12,8 @@ import (
 const appPageBaseUrl = "https://play.google.com/store/apps/details?id="
 
 // AppInfo holds the extracted info for some app. It holds the extracted
-// text as-is from each one's corresponding field in the app page.
+// text, as-is, for each field, from each one's corresponding section in
+// the app page of that app.
 type AppInfo struct {
 	// Country is the country of the app page which these fields are
 	// extracted from, or locales.DefCountry if no specific country
@@ -138,6 +139,8 @@ type AppInfo struct {
 	AgeRating      string `json:",omitempty"`
 }
 
+// DefaultAppUrl returns the default url of this app, which is the url
+// of the app without specifying the country or the language.
 func (app AppInfo) DefaultAppUrl() string {
 	if app.AppId == "" {
 		return ""
@@ -145,7 +148,8 @@ func (app AppInfo) DefaultAppUrl() string {
 	return appPageBaseUrl + app.AppId
 }
 
-// ToJSON formats this app info as a JSON string
+// ToJSON formats this app info as a JSON string. It returns a non-nil
+// error if anything went wrong while formatting the app.
 func (app AppInfo) ToJSON() (string, error) {
 	ba, e := json.Marshal(app)
 	if e != nil {
