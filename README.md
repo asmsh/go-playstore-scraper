@@ -1,5 +1,6 @@
-# go-playstore-scraper
-> It provides an api to retrieve the info of any particular app in the play store.
+# go-playstore-scraper [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/asmsh/go-playstore-scraper)](https://pkg.go.dev/mod/github.com/asmsh/go-playstore-scraper)
+
+It provides an API to retrieve the info of any particular app in the play store.
 
 ### Installing
 > go get "github.com/asmsh/go-playstore-scraper"
