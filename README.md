@@ -1,4 +1,4 @@
-# go-playstore-scraper [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/asmsh/go-playstore-scraper)](https://pkg.go.dev/mod/github.com/asmsh/go-playstore-scraper)
+# go-playstore-scraper [![PkgGoDev](https://pkg.go.dev/badge/mod/github.com/asmsh/go-playstore-scraper)](https://pkg.go.dev/mod/github.com/asmsh/go-playstore-scraper) [![Go Report Card](https://goreportcard.com/badge/github.com/asmsh/go-playstore-scraper)](https://goreportcard.com/report/github.com/asmsh/go-playstore-scraper)
 
 It provides an API to retrieve the info of any particular app in the play store.
 
