@@ -10,6 +10,9 @@ Still in beta.
 Check the changes before upgrading.    
 See issues for not supported app fields.
 
+### Legal
+This code is in no way affiliated with, authorized, maintained, sponsored or endorsed by Google or any of its affiliates or subsidiaries. This is an independent and unofficial API. Use at your own risk.
+
 ### Examples
 
 * Using the app id(package name), extract all the app info. 
