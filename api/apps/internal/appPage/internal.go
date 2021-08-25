@@ -90,6 +90,47 @@ mainLoop:
 				// count even any tag that we might close in parsing.
 				handleDefaultStartTagToken(t)
 			}
+		case html.SelfClosingTagToken:
+			// try to parse the img tag if it's identified as SelfClosingTag.
+			// it was already being identified as a StartTag, but now it stopped.
+			t := acTz.Token()
+			switch t.Data {
+			case "img":
+				// <img> tags doesn't count against opened tags.
+				if containerFound && openedTags == containerTagNum {
+					/*// skip non candidate tags to improve the speed
+					if len(t.Attr) < 5 {
+						continue mainLoop
+					}*/
+
+					var tmpLoRes string
+					var tmpHiRes string
+					var signs int8
+					for _, attr := range t.Attr {
+						switch {
+						case attr.Key == "class" && attr.Val == "T75of sHb2Xb":
+							signs++
+						case attr.Key == "itemprop" && attr.Val == "image":
+							signs++
+						case attr.Key == "src" && attr.Val != "":
+							signs++
+							tmpLoRes = attr.Val
+						case attr.Key == "srcset" && attr.Val != "":
+							signs++
+							tmpHiRes = attr.Val
+						}
+					}
+					if signs == 4 {
+						tmpHiRes, e := formatHiResImgUrl(tmpHiRes)
+						if e != nil {
+							return nil, e
+						}
+						iconUrlLoRes = tmpLoRes
+						iconUrlHiRes = tmpHiRes
+						break mainLoop
+					}
+				}
+			}
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
 		case html.ErrorToken:
