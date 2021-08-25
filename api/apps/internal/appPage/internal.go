@@ -605,6 +605,33 @@ videoLoop:
 				// count even any tag that we might close in parsing
 				handleDefaultStartTagToken(t)
 			}
+		case html.SelfClosingTagToken:
+			// try to parse the img tag if it's identified as SelfClosingTag.
+			t := acTz.Token()
+			switch t.Data {
+			case "img":
+				if videoImgContainerFound && openedTags == videoImgContainerTagNum {
+					// skip non candidate tags to improve the speed
+					/*if len(t.Attr) < 2 {
+						continue videoLoop
+					}*/
+
+					var tmp string
+					var signs int8
+					for _, attr := range t.Attr {
+						switch {
+						case attr.Key == "class" && attr.Val == "T75of DYfLw":
+							signs++
+						case attr.Key == "src" && attr.Val != "":
+							signs++
+							tmp = attr.Val
+						}
+					}
+					if signs == 2 {
+						startImgUrl = tmp
+					}
+				}
+			}
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
 		case html.ErrorToken:
@@ -622,7 +649,7 @@ screenshotsLoop:
 		tt := acTz.Next()
 		totalTagsCounter++
 		switch tt {
-		case html.StartTagToken:
+		case html.StartTagToken, html.SelfClosingTagToken:
 			t := acTz.Token()
 			switch t.Data {
 			case "img":
@@ -656,7 +683,9 @@ screenshotsLoop:
 					imagesURLs = append(imagesURLs, tmpSrc, highRes)
 				}
 			default:
-				handleDefaultStartTagToken(t)
+				if tt == html.StartTagToken {
+					handleDefaultStartTagToken(t)
+				}
 			}
 		case html.EndTagToken:
 			handleDefaultEndTagToken(acTz.Token())
